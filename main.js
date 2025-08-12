@@ -104,15 +104,15 @@ class CalendarView extends ItemView {
         container.style.width = "100%";
         container.style.boxSizing = "border-box";
 
-        // Controls for month navigation
+        // Controls for month navigation (buttons surrounding month name)
         const nav = container.createEl("div");
         nav.style.display = "flex";
         nav.style.alignItems = "center";
-        nav.style.justifyContent = "space-between";
+        nav.style.justifyContent = "center";
         nav.style.marginBottom = "8px";
+        nav.style.gap = "8px";
 
         const prevBtn = nav.createEl("button", { text: "<" });
-        prevBtn.style.flex = "0 0 auto";
         prevBtn.onclick = () => {
             if (this.displayMonth === 0) {
                 this.displayMonth = 11;
@@ -123,8 +123,14 @@ class CalendarView extends ItemView {
             this.render();
         };
 
+        const monthName = new Date(this.displayYear, this.displayMonth, 1).toLocaleString("default", { month: "long" });
+        const monthLabel = nav.createEl("span", { text: `${monthName} ${this.displayYear}` });
+        monthLabel.style.flex = "0 0 auto";
+        monthLabel.style.textAlign = "center";
+        monthLabel.style.fontWeight = "bold";
+        monthLabel.style.minWidth = "120px";
+
         const nextBtn = nav.createEl("button", { text: ">" });
-        nextBtn.style.flex = "0 0 auto";
         nextBtn.onclick = () => {
             if (this.displayMonth === 11) {
                 this.displayMonth = 0;
@@ -134,12 +140,6 @@ class CalendarView extends ItemView {
             }
             this.render();
         };
-
-        const monthName = new Date(this.displayYear, this.displayMonth, 1).toLocaleString("default", { month: "long" });
-        const monthLabel = nav.createEl("span", { text: `${monthName} ${this.displayYear}` });
-        monthLabel.style.flex = "1 1 auto";
-        monthLabel.style.textAlign = "center";
-        monthLabel.style.fontWeight = "bold";
 
         // Day indicators
         const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
