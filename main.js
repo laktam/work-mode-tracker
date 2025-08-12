@@ -123,12 +123,19 @@ class CalendarView extends ItemView {
             this.render();
         };
 
+        const today = new Date();
+        const isCurrentMonth = (this.displayMonth === today.getMonth() && this.displayYear === today.getFullYear());
         const monthName = new Date(this.displayYear, this.displayMonth, 1).toLocaleString("default", { month: "long" });
         const monthLabel = nav.createEl("span", { text: `${monthName} ${this.displayYear}` });
         monthLabel.style.flex = "0 0 auto";
         monthLabel.style.textAlign = "center";
         monthLabel.style.fontWeight = "bold";
         monthLabel.style.minWidth = "120px";
+        if (isCurrentMonth) {
+            monthLabel.style.textDecoration = "underline";
+            monthLabel.style.textDecorationThickness = "2px";
+            monthLabel.style.textUnderlineOffset = "4px";
+        }
 
         const nextBtn = nav.createEl("button", { text: ">" });
         nextBtn.onclick = () => {
@@ -193,6 +200,16 @@ class CalendarView extends ItemView {
             dayEl.style.border = "1px solid #ccc";
             dayEl.style.borderRadius = "4px";
             dayEl.style.userSelect = "none";
+
+            // Underline current day if in current month/year
+            if (
+                isCurrentMonth &&
+                day === today.getDate()
+            ) {
+                dayEl.style.textDecoration = "underline";
+                dayEl.style.textDecorationThickness = "2px";
+                dayEl.style.textUnderlineOffset = "4px";
+            }
 
             // Saturday (6) and Sunday (0) - lighter color, unselectable
             if (dayOfWeek === 6 || dayOfWeek === 0) {
