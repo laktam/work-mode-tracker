@@ -13,8 +13,17 @@ class OnsiteCalendarPlugin extends Plugin {
     async onload() {
         await this.loadDataFile();
         this.registerView(VIEW_TYPE_ONSITE, (leaf) => new CalendarView(leaf, this));
-        this.addRibbonIcon("calendar", "Open On-site Calendar", () => {
-            this.activateView();
+        this.addRibbonIcon("calendar", "Open On-site Calendar", async () => {
+            // Check if the view is already open
+            const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_ONSITE);
+            if (leaves.length > 0) {
+                // Close all open onsite calendar views
+                for (const leaf of leaves) {
+                    leaf.detach();
+                }
+            } else {
+                await this.activateView();
+            }
         });
         this.addCommand({
             id: "open-onsite-calendar",
@@ -85,6 +94,10 @@ class CalendarView extends ItemView {
     render() {
         const container = this.containerEl.children[1];
         container.empty();
+
+        // Ensure the side panel is wide enough for 7 days
+        container.style.minWidth = "350px"; // ~50px per day, adjust as needed
+
         container.createEl("h2", { text: "On-site Calendar" });
 
         const today = new Date();
