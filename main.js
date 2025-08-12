@@ -7,7 +7,6 @@ class OnsiteCalendarPlugin extends Plugin {
         super(...arguments);
         this.data = {};
         this.filePath = "onsite_days.json";
-        this.quota = 8;
     }
 
     async onload() {
@@ -244,7 +243,7 @@ class CalendarView extends ItemView {
         }
 
         container.createEl("div", {
-            text: `On-site days: ${totalOnsite} / ${this.plugin.quota}`,
+            text: `On-site days: ${totalOnsite}`,
         });
     }
 }
