@@ -1,7 +1,7 @@
 {
-  "name": "onsite-tracker",
+  "name": "work-mode-tracker",
   "version": "1.0.0",
-  "description": "Calendar to track on-site and remote  work days",
+  "description": "Obsidian plugin to track on-site and remote work days",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
