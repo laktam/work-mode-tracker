@@ -95,15 +95,23 @@ class CalendarView extends ItemView {
         const container = this.containerEl.children[1];
         container.empty();
 
-        // Ensure the side panel is wide enough for 7 days
-        container.style.minWidth = "350px"; // ~50px per day, adjust as needed
+        // Make sure the container uses the full width
+        container.style.minWidth = "0";
+        container.style.width = "100%";
+        container.style.boxSizing = "border-box";
 
         container.createEl("h2", { text: "On-site Calendar" });
 
         const today = new Date();
         const month = today.getMonth();
         const year = today.getFullYear();
+
+        // Calendar grid with 7 columns
         const calendarEl = container.createEl("div", { cls: "calendar-grid" });
+        calendarEl.style.display = "grid";
+        calendarEl.style.gridTemplateColumns = "repeat(7, 1fr)";
+        calendarEl.style.gap = "4px";
+        calendarEl.style.width = "100%";
 
         for (let day = 1; day <= 31; day++) {
             const dateObj = new Date(year, month, day);
@@ -115,8 +123,19 @@ class CalendarView extends ItemView {
                 cls: "calendar-day",
             });
 
+            // Make each day fill its grid cell
+            dayEl.style.textAlign = "center";
+            dayEl.style.padding = "8px 0";
+            dayEl.style.border = "1px solid #ccc";
+            dayEl.style.borderRadius = "4px";
+            dayEl.style.cursor = "pointer";
+            dayEl.style.background = "#f8f8f8";
+            dayEl.style.userSelect = "none";
+
             if (this.plugin.data[dateStr]) {
                 dayEl.addClass("onsite");
+                dayEl.style.background = "#b3e5fc";
+                dayEl.style.fontWeight = "bold";
             }
 
             dayEl.onclick = () => {
