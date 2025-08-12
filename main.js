@@ -75,6 +75,10 @@ class CalendarView extends ItemView {
     constructor(leaf, plugin) {
         super(leaf);
         this.plugin = plugin;
+        // Track the current displayed month/year
+        const today = new Date();
+        this.displayMonth = today.getMonth();
+        this.displayYear = today.getFullYear();
     }
 
     getViewType() {
@@ -100,13 +104,42 @@ class CalendarView extends ItemView {
         container.style.width = "100%";
         container.style.boxSizing = "border-box";
 
-        // Month name
-        const today = new Date();
-        const month = today.getMonth();
-        const year = today.getFullYear();
-        const monthName = today.toLocaleString("default", { month: "long" });
+        // Controls for month navigation
+        const nav = container.createEl("div");
+        nav.style.display = "flex";
+        nav.style.alignItems = "center";
+        nav.style.justifyContent = "space-between";
+        nav.style.marginBottom = "8px";
 
-        container.createEl("h2", { text: `${monthName} ${year}` });
+        const prevBtn = nav.createEl("button", { text: "<" });
+        prevBtn.style.flex = "0 0 auto";
+        prevBtn.onclick = () => {
+            if (this.displayMonth === 0) {
+                this.displayMonth = 11;
+                this.displayYear -= 1;
+            } else {
+                this.displayMonth -= 1;
+            }
+            this.render();
+        };
+
+        const nextBtn = nav.createEl("button", { text: ">" });
+        nextBtn.style.flex = "0 0 auto";
+        nextBtn.onclick = () => {
+            if (this.displayMonth === 11) {
+                this.displayMonth = 0;
+                this.displayYear += 1;
+            } else {
+                this.displayMonth += 1;
+            }
+            this.render();
+        };
+
+        const monthName = new Date(this.displayYear, this.displayMonth, 1).toLocaleString("default", { month: "long" });
+        const monthLabel = nav.createEl("span", { text: `${monthName} ${this.displayYear}` });
+        monthLabel.style.flex = "1 1 auto";
+        monthLabel.style.textAlign = "center";
+        monthLabel.style.fontWeight = "bold";
 
         // Day indicators
         const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -133,7 +166,7 @@ class CalendarView extends ItemView {
         calendarEl.style.width = "100%";
 
         // Find the first day of the month (0=Sunday, 1=Monday,...)
-        const firstDay = new Date(year, month, 1).getDay();
+        const firstDay = new Date(this.displayYear, this.displayMonth, 1).getDay();
         let offset = firstDay === 0 ? 6 : firstDay - 1;
 
         // Add empty cells for offset
@@ -142,9 +175,10 @@ class CalendarView extends ItemView {
             emptyCell.style.background = "transparent";
         }
 
+        // Render days for the selected month/year
         for (let day = 1; day <= 31; day++) {
-            const dateObj = new Date(year, month, day);
-            if (dateObj.getMonth() !== month) break;
+            const dateObj = new Date(this.displayYear, this.displayMonth, day);
+            if (dateObj.getMonth() !== this.displayMonth) break;
 
             const dateStr = dateObj.toISOString().split("T")[0];
             const dayOfWeek = dateObj.getDay(); // 0=Sunday, 6=Saturday
@@ -183,7 +217,15 @@ class CalendarView extends ItemView {
             }
         }
 
-        const totalOnsite = Object.values(this.plugin.data).filter((v) => v).length;
+        // Count only days in the current month
+        let totalOnsite = 0;
+        for (let day = 1; day <= 31; day++) {
+            const dateObj = new Date(this.displayYear, this.displayMonth, day);
+            if (dateObj.getMonth() !== this.displayMonth) break;
+            const dateStr = dateObj.toISOString().split("T")[0];
+            if (this.plugin.data[dateStr]) totalOnsite++;
+        }
+
         container.createEl("div", {
             text: `On-site days: ${totalOnsite} / ${this.plugin.quota}`,
         });
