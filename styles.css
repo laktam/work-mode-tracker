@@ -1,0 +1,19 @@
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+  gap: 5px;
+  padding: 5px;
+}
+
+.calendar-day {
+  border: 1px solid var(--background-modifier-border);
+  text-align: center;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.calendar-day.onsite {
+  background-color: var(--interactive-accent);
+  color: white;
+  border-radius: 4px;
+}
