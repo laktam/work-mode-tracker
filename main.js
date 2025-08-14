@@ -6,11 +6,12 @@ class OnsiteCalendarPlugin extends Plugin {
     constructor() {
         super(...arguments);
         this.data = {};
-        this.filePath = "onsite_days.json";
+        this.filePath = `${this.manifest.dir}/onsite_days.json`;
     }
 
     async onload() {
-        await this.loadDataFile();
+        // await this.loadDataFile();
+        this.data = (await this.loadData()) || {};
         this.registerView(VIEW_TYPE_ONSITE, (leaf) => new CalendarView(leaf, this));
         this.addRibbonIcon("calendar", "Open On-site Calendar", async () => {
             // Check if the view is already open
@@ -50,15 +51,17 @@ class OnsiteCalendarPlugin extends Plugin {
     }
 
     async saveDataFile() {
-        await this.app.vault.modify(
-            this.app.vault.getAbstractFileByPath(this.filePath),
-            JSON.stringify(this.data, null, 2)
-        );
+        let file = this.app.vault.getAbstractFileByPath(this.filePath);
+        if (!file) {
+            await this.app.vault.create(this.filePath, JSON.stringify(this.data, null, 2));
+        } else {
+            await this.app.vault.modify(file, JSON.stringify(this.data, null, 2));
+        }
     }
 
-    toggleDay(date) {
+    async toggleDay(date) {
         this.data[date] = !this.data[date];
-        this.saveDataFile();
+        await this.saveData(this.data);
     }
 
     async activateView() {
