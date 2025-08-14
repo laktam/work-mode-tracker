@@ -6,11 +6,9 @@ class OnsiteCalendarPlugin extends Plugin {
     constructor() {
         super(...arguments);
         this.data = {};
-        this.filePath = `${this.manifest.dir}/onsite_days.json`;
     }
 
     async onload() {
-        // await this.loadDataFile();
         this.data = (await this.loadData()) || {};
         this.registerView(VIEW_TYPE_ONSITE, (leaf) => new CalendarView(leaf, this));
         this.addRibbonIcon("calendar", "Open On-site Calendar", async () => {
@@ -33,31 +31,6 @@ class OnsiteCalendarPlugin extends Plugin {
     }
 
     onunload() { }
-
-    async loadDataFile() {
-        try {
-            const file = this.app.vault.getAbstractFileByPath(this.filePath);
-            if (file) {
-                const content = await this.app.vault.read(file);
-                this.data = JSON.parse(content);
-            } else {
-                await this.app.vault.create(this.filePath, "{}");
-                this.data = {};
-            }
-        } catch (e) {
-            console.error("Error loading data file", e);
-            this.data = {};
-        }
-    }
-
-    async saveDataFile() {
-        let file = this.app.vault.getAbstractFileByPath(this.filePath);
-        if (!file) {
-            await this.app.vault.create(this.filePath, JSON.stringify(this.data, null, 2));
-        } else {
-            await this.app.vault.modify(file, JSON.stringify(this.data, null, 2));
-        }
-    }
 
     async toggleDay(date) {
         this.data[date] = !this.data[date];
@@ -229,9 +202,9 @@ class CalendarView extends ItemView {
                     dayEl.style.fontWeight = "bold";
                     dayEl.style.color = "#fff";
                 }
-                dayEl.onclick = () => {
-                    this.plugin.toggleDay(dateStr);
-                    this.render();
+                dayEl.onclick = async () => { 
+                    await this.plugin.toggleDay(dateStr); 
+                    this.render(); 
                 };
             }
         }
