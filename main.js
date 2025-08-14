@@ -221,6 +221,115 @@ class CalendarView extends ItemView {
         container.createEl("div", {
             text: `On-site days: ${totalOnsite}`,
         });
+
+        // --- Statistics Graph ---
+        // Prepare data: count onsite days for each of the last 6 months
+        const last6Months = [];
+        let m = this.displayMonth;
+        let y = this.displayYear;
+        for (let i = 5; i >= 0; i--) {
+            let month = m - i;
+            let year = y;
+            if (month < 0) {
+                month += 12;
+                year -= 1;
+            }
+            last6Months.push({ month, year });
+        }
+        const onsiteCounts = last6Months.map(({ month, year }) => {
+            let count = 0;
+            for (let day = 1; day <= 31; day++) {
+                const dateObj = new Date(year, month, day);
+                if (dateObj.getMonth() !== month) break;
+                const dateStr = dateObj.toISOString().split("T")[0];
+                if (this.plugin.data[dateStr]) count++;
+            }
+            return count;
+        });
+
+        // Create canvas for the graph
+        const graphContainer = container.createEl("div");
+        graphContainer.style.marginTop = "24px";
+        graphContainer.style.width = "100%";
+        graphContainer.style.overflowX = "hidden"; // Prevent horizontal scroll
+
+        // Set canvas width to fit container (max 400px, min 100%)
+        const canvas = graphContainer.createEl("canvas");
+        canvas.width = graphContainer.offsetWidth > 0 ? graphContainer.offsetWidth : 400;
+        canvas.width = Math.max(canvas.width, 400);
+        canvas.height = 200;
+        canvas.style.maxWidth = "100%";
+        canvas.style.width = "100%";
+        canvas.style.display = "block";
+
+        // Draw the graph
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Axis
+        ctx.strokeStyle = "#333";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(40, 20);
+        ctx.lineTo(40, 180); // Y axis
+        ctx.lineTo(canvas.width - 10, 180); // X axis (extend a bit further)
+        ctx.stroke();
+
+        ctx.stroke();
+
+        // Y axis labels (max days in any month)
+        const maxDays = Math.max(...onsiteCounts, 1);
+        ctx.font = "12px sans-serif";
+        ctx.fillStyle = "#333";
+        for (let i = 0; i <= maxDays; i += Math.ceil(maxDays / 5) || 1) {
+            const y = 180 - (i / maxDays) * 140;
+            ctx.fillText(i.toString(), 10, y + 4);
+            ctx.beginPath();
+            ctx.moveTo(38, y);
+            ctx.lineTo(42, y);
+            ctx.stroke();
+        }
+
+        // X axis labels (last 6 months)
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        for (let i = 0; i < 6; i++) {
+            const x = 40 + (i * ((canvas.width - 60) / 5));
+            const { month, year } = last6Months[i];
+            ctx.fillText(`${monthNames[month]} ${year}`, x - 18, 195);
+        }
+
+        // Draw lines and dots
+        ctx.strokeStyle = "#1976d2";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const x = 40 + (i * ((canvas.width - 60) / 5));
+            const y = 180 - (onsiteCounts[i] / (maxDays || 1)) * 140;
+            if (i === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+        ctx.stroke();
+
+        // Draw dots
+        for (let i = 0; i < 6; i++) {
+            const x = 40 + (i * ((canvas.width - 60) / 5));
+            const y = 180 - (onsiteCounts[i] / (maxDays || 1)) * 140;
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = "#1976d2";
+            ctx.fill();
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        // Title
+        ctx.font = "bold 14px sans-serif";
+        ctx.fillStyle = "#333";
+        ctx.fillText(`On-site Days (Last 6 Months)`, 80, 16);
     }
 }
 
