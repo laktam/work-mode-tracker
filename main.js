@@ -292,10 +292,13 @@ class CalendarView extends ItemView {
 
         // X axis labels (last 6 months)
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        const graphRightPadding = 40; // instead of fixed 20
+        const availableWidth = canvas.width - 40 - graphRightPadding;
         for (let i = 0; i < 6; i++) {
-            const x = 40 + (i * ((canvas.width - 60) / 5));
+            const x = 40 + (i * (availableWidth / 5));
             const { month, year } = last6Months[i];
-            ctx.fillText(`${monthNames[month]} ${year}`, x - 18, 195);
+            ctx.fillText(`${monthNames[month]} ${year}`, x - 20, 195);
         }
 
         // Draw lines and dots
