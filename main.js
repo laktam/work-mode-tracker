@@ -313,10 +313,22 @@ class CalendarView extends ItemView {
         }
         ctx.stroke();
 
-        // Draw dots
+        // Draw dots and dashed lines from x axis to each point
         for (let i = 0; i < 6; i++) {
             const x = 40 + (i * ((canvas.width - 60) / 5));
             const y = 180 - (onsiteCounts[i] / (maxDays || 1)) * 140;
+
+            // Dashed line from x axis to point
+            ctx.save();
+            ctx.setLineDash([4, 4]);
+            ctx.strokeStyle = "#1976d2";
+            ctx.beginPath();
+            ctx.moveTo(x, 180);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.restore();
+
+            // Dot
             ctx.beginPath();
             ctx.arc(x, y, 5, 0, 2 * Math.PI);
             ctx.fillStyle = "#1976d2";
